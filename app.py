@@ -4,6 +4,8 @@ import numpy as np
 from flask import Flask, request, jsonify, render_template
 from tensorflow.keras.models import load_model
 import logging
+import socket
+from tensorflow.keras import backend as K
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -13,8 +15,22 @@ app = Flask(__name__)
 
 # Load the trained model
 logger.info("Loading model...")
-model = load_model('forest_fire_model.h5')
-logger.info("Model loaded successfully!")
+try:
+    # Try loading with custom_objects to handle version compatibility
+    model = load_model('forest_fire_model.h5', compile=False)
+    logger.info("Model loaded successfully!")
+except Exception as e:
+    logger.error(f"Error loading model: {str(e)}")
+    logger.info("Attempting to load model with custom objects...")
+    try:
+        # Try loading with custom objects
+        model = load_model('forest_fire_model.h5', 
+                         compile=False,
+                         custom_objects={'InputLayer': K.layers.InputLayer})
+        logger.info("Model loaded successfully with custom objects!")
+    except Exception as e:
+        logger.error(f"Failed to load model: {str(e)}")
+        raise
 
 def preprocess_image(image):
     # Resize image to match model's expected sizing
@@ -58,7 +74,22 @@ def predict():
     })
 
 if __name__ == '__main__':
+    # Try to get port from environment variable, default to 10000
     port = int(os.environ.get('PORT', 10000))
-    logger.info(f"Starting server on port {port}")
+    logger.info(f"Attempting to start server on port {port}")
+    
+    # Try to bind to the port to check if it's available
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        sock.bind(('0.0.0.0', port))
+        sock.close()
+        logger.info(f"Port {port} is available")
+    except socket.error as e:
+        logger.error(f"Port {port} is not available: {e}")
+        # Try alternative port
+        port = 8080
+        logger.info(f"Trying alternative port {port}")
+    
+    logger.info(f"Starting Flask application on port {port}")
     app.run(host='0.0.0.0', port=port, debug=False)
 
