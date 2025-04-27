@@ -1,7 +1,11 @@
 flask==2.0.1
+werkzeug==2.0.3
 tensorflow-cpu==2.15.0
 opencv-python==4.7.0.72
-numpy==1.23.5
-pillow==9.4.0
+numpy>=1.23.5,<2.2.0
+pillow>=9.4.0
 scikit-learn==1.2.2
-keras==2.15.0 
+keras==2.15.0
+protobuf>=3.20.3,<6.0.0
+h5py>=3.1.0
+six>=1.15.0 
