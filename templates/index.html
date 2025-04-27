@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forest Fire Detection System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Forest Fire Detection System</h1>
+            <p>Upload an image to detect forest fires</p>
+        </header>
+
+        <main>
+            <div class="upload-container">
+                <div class="upload-box" id="dropZone">
+                    <div class="upload-icon"></div>
+                    <p>Drag & Drop your image here</p>
+                    <p>or</p>
+                    <input type="file" id="fileInput" accept="image/*" hidden>
+                    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Choose File</button>
+                </div>
+            </div>
+
+            <div class="result-container" id="resultContainer" style="display: none;">
+                <div class="preview-container">
+                    <img id="previewImage" src="" alt="Preview">
+                </div>
+                <div class="prediction-container">
+                    <h2>Prediction Result</h2>
+                    <div class="result-box">
+                        <p id="resultText"></p>
+                        <p id="confidenceText"></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Forest Fire Detection System &copy; 2024</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html> 
