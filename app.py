@@ -3,9 +3,9 @@ import cv2
 import numpy as np
 from flask import Flask, request, jsonify, render_template
 from tensorflow.keras.models import load_model
+from tensorflow.keras.layers import InputLayer
 import logging
 import socket
-from tensorflow.keras import backend as K
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -17,17 +17,36 @@ app = Flask(__name__)
 logger.info("Loading model...")
 try:
     # Try loading with custom_objects to handle version compatibility
-    model = load_model('forest_fire_model.h5', compile=False)
+    model = load_model('forest_fire_model.h5', 
+                      compile=False,
+                      custom_objects={'InputLayer': InputLayer})
     logger.info("Model loaded successfully!")
 except Exception as e:
     logger.error(f"Error loading model: {str(e)}")
-    logger.info("Attempting to load model with custom objects...")
+    logger.info("Attempting to load model with different approach...")
     try:
-        # Try loading with custom objects
-        model = load_model('forest_fire_model.h5', 
-                         compile=False,
-                         custom_objects={'InputLayer': K.layers.InputLayer})
-        logger.info("Model loaded successfully with custom objects!")
+        # Try loading with a different approach
+        from tensorflow.keras.models import Sequential
+        from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+        
+        # Create a new model with the same architecture
+        model = Sequential([
+            InputLayer(input_shape=(250, 250, 3)),
+            Conv2D(32, (3, 3), activation='relu'),
+            MaxPooling2D((2, 2)),
+            Conv2D(64, (3, 3), activation='relu'),
+            MaxPooling2D((2, 2)),
+            Conv2D(128, (3, 3), activation='relu'),
+            MaxPooling2D((2, 2)),
+            Flatten(),
+            Dense(128, activation='relu'),
+            Dropout(0.5),
+            Dense(2, activation='softmax')
+        ])
+        
+        # Load weights
+        model.load_weights('forest_fire_model.h5')
+        logger.info("Model loaded successfully with alternative approach!")
     except Exception as e:
         logger.error(f"Failed to load model: {str(e)}")
         raise
